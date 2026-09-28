@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Absensi Siswa</title>
+<meta name="theme-color" content="#5b21b6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+<main class="wrap">
+  <header class="hero">
+    <h1>Absensi Siswa 📚</h1>
+    <p class="sub">Isi kehadiranmu hari ini dengan mudah!</p>
+    <div class="clock">
+      <div id="jam" class="jam">--.--.--</div>
+      <div id="tanggal" class="tgl">Memuat tanggal…</div>
+      <span class="wib">🌏 Waktu Indonesia Barat (WIB)</span>
+    </div>
+  </header>
+
+  <form id="form" class="card" novalidate>
+    <h2>📝 Form Absensi</h2>
+    <p class="hint">Isi data dengan benar sebelum mengirim.</p>
+
+    <label for="nama">Nama lengkap siswa</label>
+    <input id="nama" type="text" placeholder="Contoh: Ahmad Fauzi" autocomplete="off" maxlength="60">
+
+    <label for="kelas">Kelas <small>(boleh dikosongkan)</small></label>
+    <input id="kelas" type="text" placeholder="Contoh: XI IPA 2" autocomplete="off" maxlength="20">
+
+    <label>Pilih status kehadiran</label>
+    <div class="status">
+      <label class="opt hadir"><input type="radio" name="status" value="Hadir" checked><span>✅ Hadir</span></label>
+      <label class="opt izin"><input type="radio" name="status" value="Izin"><span>📩 Izin</span></label>
+      <label class="opt sakit"><input type="radio" name="status" value="Sakit"><span>🤒 Sakit</span></label>
+      <label class="opt alpa"><input type="radio" name="status" value="Alpa"><span>❌ Alpa</span></label>
+    </div>
+
+    <div id="ketBox" hidden>
+      <label for="ket">Keterangan <small>(boleh dikosongkan)</small></label>
+      <textarea id="ket" rows="2" maxlength="150" placeholder="Tulis alasan singkat"></textarea>
+    </div>
+
+    <p id="pesan" class="pesan" role="alert"></p>
+    <button id="kirim" class="kirim" type="submit">🚀 Kirim Absensi</button>
+    <p class="foot">Jam dan menit kirim tercatat otomatis dalam WIB.</p>
+  </form>
+</main>
+
+<div id="sukses" class="overlay" hidden>
+  <div class="modal">
+    <div class="check">✓</div>
+    <h3>Absensi terkirim!</h3>
+    <p id="ringkas"></p>
+    <div id="waktuKirim" class="chip"></div>
+    <p id="demo" class="demo" hidden>Mode demo: EmailJS belum diisi di config.js, jadi data belum masuk ke email.</p>
+    <button id="tutup" class="kirim" type="button">Selesai</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="config.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
