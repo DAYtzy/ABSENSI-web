@@ -1,4 +1,4 @@
-const TZ = "Asia/Jakarta"; // WIB, tidak tergantung zona waktu HP/laptop siswa
+const TZ = "Asia/Jakarta"; // WIB, tidak tergantung zona waktu HP siswa
 const $ = (id) => document.getElementById(id);
 
 const fJam = new Intl.DateTimeFormat("id-ID", { timeZone: TZ, hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
@@ -26,11 +26,64 @@ const baca = () => { try { return JSON.parse(localStorage.getItem(kunci()) || "[
 const catat = (n) => { try { localStorage.setItem(kunci(), JSON.stringify([...baca(), n.toLowerCase()])); } catch {} };
 const pesan = (t) => { $("pesan").textContent = t; };
 
+// --- Kamera: siswa wajib ambil selfie sebagai bukti kehadiran ---
+let stream = null;
+let fotoData = null;
+const video = $("video"), fotoImg = $("foto"), canvas = $("canvas"), placeholder = $("camPlaceholder");
+const btnCam = $("btnCam"), btnAmbil = $("btnAmbil"), btnUlang = $("btnUlang");
+
+btnCam.addEventListener("click", async () => {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+    video.srcObject = stream;
+    video.hidden = false;
+    fotoImg.hidden = true;
+    placeholder.hidden = true;
+    btnCam.hidden = true;
+    btnAmbil.hidden = false;
+  } catch (err) {
+    console.error(err);
+    pesan("Tidak bisa membuka kamera. Izinkan akses kamera di browser, lalu coba lagi.");
+  }
+});
+
+btnAmbil.addEventListener("click", () => {
+  canvas.width = 320;
+  canvas.height = 240;
+  canvas.getContext("2d").drawImage(video, 0, 0, 320, 240);
+  fotoData = canvas.toDataURL("image/jpeg", 0.6);
+  fotoImg.src = fotoData;
+  fotoImg.hidden = false;
+  video.hidden = true;
+  if (stream) stream.getTracks().forEach((t) => t.stop());
+  btnAmbil.hidden = true;
+  btnUlang.hidden = false;
+});
+
+btnUlang.addEventListener("click", () => {
+  fotoData = null;
+  fotoImg.hidden = true;
+  placeholder.hidden = false;
+  btnUlang.hidden = true;
+  btnCam.hidden = false;
+});
+
+function resetKamera() {
+  fotoData = null;
+  fotoImg.hidden = true;
+  video.hidden = true;
+  placeholder.hidden = false;
+  btnAmbil.hidden = true;
+  btnUlang.hidden = true;
+  btnCam.hidden = false;
+}
+
 $("form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const nama = $("nama").value.trim().replace(/\s+/g, " ");
   if (nama.length < 3) return pesan("Tulis nama lengkapmu dulu ya (minimal 3 huruf).");
   if (baca().includes(nama.toLowerCase())) return pesan(nama + " sudah absen hari ini.");
+  if (!fotoData) return pesan("Ambil foto dulu sebagai bukti kehadiran.");
 
   const now = new Date(); // waktu saat tombol kirim ditekan
   const data = {
@@ -42,6 +95,7 @@ $("form").addEventListener("submit", async (e) => {
     jam: fMenit.format(now),
     zona: "WIB",
     waktu_kirim: `${fTgl.format(now)}, pukul ${fMenit.format(now)} WIB`,
+    foto: fotoData,
   };
 
   const btn = $("kirim");
@@ -57,6 +111,7 @@ $("form").addEventListener("submit", async (e) => {
     sukses(data, !siap);
     $("form").reset();
     toggleKet();
+    resetKamera();
   } catch (err) {
     console.error(err);
     pesan("Absensi belum terkirim. Cek internetmu lalu tekan Kirim lagi.");

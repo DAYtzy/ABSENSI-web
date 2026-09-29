@@ -1,5 +1,5 @@
-// Isi 3 data dari dashboard EmailJS (langkahnya ada di README.md).
-// Selama masih "ISI_...", web berjalan dalam mode demo (belum kirim email).
+// Ini sudah diisi dengan data EmailJS yang kamu pakai sebelumnya.
+// Kalau kamu membuat service/template baru, ganti tiga nilai di bawah ini.
 window.CONFIG = {
   publicKey: "4hwOIbc3k5VqiSV3W",
   serviceId: "service_mms925c",

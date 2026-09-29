@@ -29,10 +29,10 @@
     <p class="hint">Isi data dengan benar sebelum mengirim.</p>
 
     <label for="nama">Nama lengkap siswa</label>
-    <input id="nama" type="text" placeholder="Contoh: AMBATUKAM" autocomplete="off" maxlength="60">
+    <input id="nama" type="text" placeholder="Contoh: Ahmad Fauzi" autocomplete="off" maxlength="60">
 
     <label for="kelas">Kelas <small>(boleh dikosongkan)</small></label>
-    <input id="kelas" type="text" placeholder="Contoh: XI TKJ 3" autocomplete="off" maxlength="20">
+    <input id="kelas" type="text" placeholder="Contoh: XI IPA 2" autocomplete="off" maxlength="20">
 
     <label>Pilih status kehadiran</label>
     <div class="status">
@@ -47,9 +47,22 @@
       <textarea id="ket" rows="2" maxlength="150" placeholder="Tulis alasan singkat"></textarea>
     </div>
 
+    <label>Foto kehadiran</label>
+    <div class="camBox">
+      <video id="video" autoplay playsinline hidden></video>
+      <img id="foto" hidden>
+      <canvas id="canvas" hidden></canvas>
+      <div id="camPlaceholder" class="camPlaceholder">📷 Belum ada foto</div>
+    </div>
+    <div class="camBtns">
+      <button type="button" id="btnCam" class="camBtn">📷 Buka Kamera</button>
+      <button type="button" id="btnAmbil" class="camBtn" hidden>📸 Ambil Foto</button>
+      <button type="button" id="btnUlang" class="camBtn" hidden>🔄 Ambil Ulang</button>
+    </div>
+
     <p id="pesan" class="pesan" role="alert"></p>
     <button id="kirim" class="kirim" type="submit">🚀 Kirim Absensi</button>
-    <p class="foot">Jam dan menit kirim tercatat otomatis dalam WIB.</p>
+    <p class="foot">Jam, menit, dan foto kehadiran tercatat otomatis dalam WIB.</p>
   </form>
 </main>
 

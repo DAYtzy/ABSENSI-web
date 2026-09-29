@@ -1,36 +1,36 @@
-# Absensi Siswa
+# Absensi Siswa + Kamera
 
-Web statis (HTML, CSS, JS). Data absensi dikirim ke email guru lewat EmailJS.
+## Apa yang baru
+Sebelum kirim, siswa wajib buka kamera depan dan ambil foto selfie. Tombol
+"Kirim Absensi" akan menolak kalau foto belum diambil. Foto ikut terkirim ke
+email guru.
 
-## Coba dulu
-Buka `index.html`. Selama `config.js` belum diisi, web berjalan dalam **mode demo** (tampilan dan alur jalan, email belum terkirim).
+## Cara pasang
+1. Buka repo `ABSENSI-web` di GitHub.
+2. Upload ulang 4 file ini, timpa yang lama:
+   - `index.html`
+   - `style.css`
+   - `script.js`
+   - `config.js` (sudah diisi otomatis dengan data EmailJS-mu sebelumnya:
+     Service ID `service_mms925c`, Template ID `template_z6o3eyc`)
+3. Commit changes. Tunggu sekitar 30 detik, Vercel akan memperbarui web
+   otomatis.
 
-## Hubungkan ke email guru (EmailJS)
-1. Daftar/login di emailjs.com.
-2. **Email Services** > Add New Service (misalnya Gmail). Salin **Service ID**.
-3. **Email Templates** > Create New Template.
-   - To Email: email guru/pengelola
-   - Subject: `Absensi {{nama}} - {{status}}`
-   - Isi pesan (variabel yang tersedia):
-     ```
-     Nama: {{nama}}
-     Kelas: {{kelas}}
-     Status: {{status}}
-     Keterangan: {{keterangan}}
-     Dikirim: {{waktu_kirim}}
-     Jam: {{jam}} {{zona}}
-     ```
-   Salin **Template ID**.
-4. **Account** > **General** > salin **Public Key**.
-5. Tempel ketiganya di `config.js`.
+## Supaya foto ikut muncul di email
+Buka template EmailJS (`Contact Us`), edit **Content**, lalu tambahkan baris
+ini sebelum `</div>` penutup:
 
-Kuota email gratis EmailJS terbatas, jadi cek batasnya di dashboard kalau siswanya banyak.
+```html
+<img src="{{foto}}" style="max-width:200px;border-radius:12px;margin-top:12px;">
+```
 
-## Deploy
-1. Upload semua file (`index.html`, `style.css`, `script.js`, `config.js`) ke repository GitHub.
-2. Di vercel.com pilih **Add New Project**, impor repository itu, lalu **Deploy**.
+Simpan template. Setelah itu foto siswa akan tampil di badan email.
 
 ## Catatan
-- Tanggal dan jam memakai zona Asia/Jakarta (WIB) dan berganti hari otomatis tiap 00:00.
-- Satu nama hanya bisa absen sekali per hari di perangkat yang sama.
-- Rekap tidak ditampilkan ke siswa; semua masuk ke email guru.
+- Kamera hanya bisa dibuka di halaman HTTPS. Link `.vercel.app` sudah HTTPS,
+  jadi aman.
+- Browser akan meminta izin kamera setiap kali web dibuka pertama kali.
+- Foto dikompres kecil (320x240, kualitas 60%) supaya email tidak gagal
+  terkirim karena ukuran terlalu besar.
+- Fitur anti absen ganda tetap berlaku: satu nama hanya bisa kirim sekali per
+  hari, di perangkat yang sama.
