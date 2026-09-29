@@ -41,6 +41,10 @@ btnCam.addEventListener("click", async () => {
     video.hidden = false;
     fotoImg.hidden = true;
     placeholder.hidden = true;
+    // Tunggu kamera benar-benar mengirim gambar (bukan cuma metadata) supaya foto tidak hitam
+    if (video.readyState < 2) {
+      await new Promise((resolve) => video.addEventListener("loadeddata", resolve, { once: true }));
+    }
     btnCam.hidden = true;
     btnAmbil.hidden = false;
   } catch (err) {
@@ -50,7 +54,7 @@ btnCam.addEventListener("click", async () => {
 });
 
 btnAmbil.addEventListener("click", () => {
-  const vw = video.videoWidth, vh = video.videoHeight;
+  const vw = video.videoWidth || 640, vh = video.videoHeight || 480;
   const maxSisi = 640; // batasi ukuran biar file tidak kebesaran, tanpa mengubah bentuk aslinya
   const skala = Math.min(1, maxSisi / Math.max(vw, vh));
   canvas.width = Math.round(vw * skala);
