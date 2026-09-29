@@ -26,11 +26,13 @@ const baca = () => { try { return JSON.parse(localStorage.getItem(kunci()) || "[
 const catat = (n) => { try { localStorage.setItem(kunci(), JSON.stringify([...baca(), n.toLowerCase()])); } catch {} };
 const pesan = (t) => { $("pesan").textContent = t; };
 
-// --- Kamera: siswa wajib ambil selfie sebagai bukti kehadiran ---
+// --- Kamera: hasil foto disimpan sebagai FILE ASLI di <input type="file">,
+// bukan teks base64, supaya email mengirimnya sebagai lampiran sungguhan ---
 let stream = null;
-let fotoData = null;
+let previewUrl = null;
 const video = $("video"), fotoImg = $("foto"), canvas = $("canvas"), placeholder = $("camPlaceholder");
 const btnCam = $("btnCam"), btnAmbil = $("btnAmbil"), btnUlang = $("btnUlang");
+const fotoInput = $("fotoInput");
 
 btnCam.addEventListener("click", async () => {
   try {
@@ -48,20 +50,37 @@ btnCam.addEventListener("click", async () => {
 });
 
 btnAmbil.addEventListener("click", () => {
-  canvas.width = 320;
-  canvas.height = 240;
-  canvas.getContext("2d").drawImage(video, 0, 0, 320, 240);
-  fotoData = canvas.toDataURL("image/jpeg", 0.6);
-  fotoImg.src = fotoData;
-  fotoImg.hidden = false;
-  video.hidden = true;
+  const vw = video.videoWidth, vh = video.videoHeight;
+  const maxSisi = 640; // batasi ukuran biar file tidak kebesaran, tanpa mengubah bentuk aslinya
+  const skala = Math.min(1, maxSisi / Math.max(vw, vh));
+  canvas.width = Math.round(vw * skala);
+  canvas.height = Math.round(vh * skala);
+  canvas.getContext("2d").drawImage(video, 0, 0, vw, vh, 0, 0, canvas.width, canvas.height);
+  canvas.toBlob(
+    (blob) => {
+      if (!blob) return;
+      const file = new File([blob], "foto-absensi.jpg", { type: "image/jpeg" });
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      fotoInput.files = dt.files;
+
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = URL.createObjectURL(blob);
+      fotoImg.src = previewUrl;
+      fotoImg.hidden = false;
+      video.hidden = true;
+    },
+    "image/jpeg",
+    0.7
+  );
   if (stream) stream.getTracks().forEach((t) => t.stop());
   btnAmbil.hidden = true;
   btnUlang.hidden = false;
 });
 
 btnUlang.addEventListener("click", () => {
-  fotoData = null;
+  fotoInput.value = "";
+  if (previewUrl) URL.revokeObjectURL(previewUrl);
   fotoImg.hidden = true;
   placeholder.hidden = false;
   btnUlang.hidden = true;
@@ -69,7 +88,8 @@ btnUlang.addEventListener("click", () => {
 });
 
 function resetKamera() {
-  fotoData = null;
+  fotoInput.value = "";
+  if (previewUrl) URL.revokeObjectURL(previewUrl);
   fotoImg.hidden = true;
   video.hidden = true;
   placeholder.hidden = false;
@@ -83,20 +103,18 @@ $("form").addEventListener("submit", async (e) => {
   const nama = $("nama").value.trim().replace(/\s+/g, " ");
   if (nama.length < 3) return pesan("Tulis nama lengkapmu dulu ya (minimal 3 huruf).");
   if (baca().includes(nama.toLowerCase())) return pesan(nama + " sudah absen hari ini.");
-  if (!fotoData) return pesan("Ambil foto dulu sebagai bukti kehadiran.");
+  if (!fotoInput.files || !fotoInput.files.length) return pesan("Ambil foto dulu sebagai bukti kehadiran.");
 
   const now = new Date(); // waktu saat tombol kirim ditekan
-  const data = {
-    nama,
-    kelas: $("kelas").value.trim() || "-",
-    status: status(),
-    keterangan: $("ket").value.trim() || "-",
-    tanggal: fTgl.format(now),
-    jam: fMenit.format(now),
-    zona: "WIB",
-    waktu_kirim: `${fTgl.format(now)}, pukul ${fMenit.format(now)} WIB`,
-    foto: fotoData,
-  };
+  const kelas = $("kelas").value.trim() || "-";
+  const ketVal = $("ket").value.trim() || "-";
+  $("hTanggal").value = fTgl.format(now);
+  $("hJam").value = fMenit.format(now);
+  $("hWaktu").value = `${fTgl.format(now)}, pukul ${fMenit.format(now)} WIB`;
+  $("kelas").value = kelas;
+  $("ket").value = ketVal;
+
+  const ringkas = { nama, status: status(), jam: fMenit.format(now), tanggal: fTgl.format(now) };
 
   const btn = $("kirim");
   btn.disabled = true;
@@ -105,10 +123,10 @@ $("form").addEventListener("submit", async (e) => {
   const C = window.CONFIG || {};
   const siap = C.publicKey && !C.publicKey.startsWith("ISI_");
   try {
-    if (siap) await emailjs.send(C.serviceId, C.templateId, data, { publicKey: C.publicKey });
+    if (siap) await emailjs.sendForm(C.serviceId, C.templateId, $("form"), { publicKey: C.publicKey });
     else await new Promise((r) => setTimeout(r, 900)); // mode demo
     catat(nama);
-    sukses(data, !siap);
+    sukses(ringkas, !siap);
     $("form").reset();
     toggleKet();
     resetKamera();
